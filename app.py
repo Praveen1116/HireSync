@@ -19,6 +19,29 @@ def load_matcher():
 # Load matcher
 matcher = load_matcher()
 
+def render_skill_badges(skills, badge_type="matched"):
+    """Renders vibrant HTML pill badges: Green for matched, Red for missing skills."""
+    if not skills:
+        return ""
+    if badge_type == "matched":
+        bg = "#14532d"       # Dark emerald green background
+        color = "#86efac"    # Bright light green text
+        border = "#22c55e"   # Green border
+        icon = "✓"
+    else:  # missing
+        bg = "#7f1d1d"       # Dark crimson red background
+        color = "#fca5a5"    # Bright light red text
+        border = "#ef4444"   # Red border
+        icon = "✕"
+
+    badges = [
+        f'<span style="background-color: {bg}; color: {color}; border: 1px solid {border}; '
+        f'padding: 5px 12px; border-radius: 16px; font-size: 0.88rem; font-weight: 600; '
+        f'margin: 4px 4px; display: inline-block; letter-spacing: 0.3px;">{icon} {s}</span>'
+        for s in skills
+    ]
+    return f'<div style="margin-top: 8px; line-height: 2.2;">{"".join(badges)}</div>'
+
 # Header & Project Context
 st.title("🎯 HireSync: Semantic Resume-to-Job Matching")
 st.markdown(
@@ -88,12 +111,21 @@ if analyze_btn:
         # 3 Score Metric Cards
         m_col1, m_col2, m_col3 = st.columns(3)
         with m_col1:
-            st.metric(label="🧠 Learned Scorer (PyTorch MLP)", value=f"{learned_score}%", delta=category)
+            st.metric(label="🧠 Learned Scorer (PyTorch MLP)", value=f"{learned_score}%")
+            if category == "Strong Match":
+                st.markdown('<span style="background-color: #14532d; color: #86efac; border: 1px solid #22c55e; padding: 3px 12px; border-radius: 14px; font-weight: 700; font-size: 0.88rem; display: inline-block;">★ Strong Match</span>', unsafe_allow_html=True)
+            elif category == "Potential Match":
+                st.markdown('<span style="background-color: #78350f; color: #fde68a; border: 1px solid #f59e0b; padding: 3px 12px; border-radius: 14px; font-weight: 700; font-size: 0.88rem; display: inline-block;">⚡ Potential Match</span>', unsafe_allow_html=True)
+            else:
+                st.markdown('<span style="background-color: #7f1d1d; color: #fca5a5; border: 1px solid #ef4444; padding: 3px 12px; border-radius: 14px; font-weight: 700; font-size: 0.88rem; display: inline-block;">✕ Low Match</span>', unsafe_allow_html=True)
         with m_col2:
             diff = round(learned_score - baseline_score, 1)
-            st.metric(label="📐 Baseline Cosine Similarity", value=f"{baseline_score}%", delta=f"{diff:+}% vs Baseline")
+            diff_color = "#22c55e" if diff >= 0 else "#ef4444"
+            st.metric(label="📐 Baseline Cosine Similarity", value=f"{baseline_score}%")
+            st.markdown(f'<span style="color: {diff_color}; font-weight: 600; font-size: 0.85rem;">{diff:+}% vs Baseline</span>', unsafe_allow_html=True)
         with m_col3:
             st.metric(label="🎯 Explicit Skill Overlap", value=f"{overlap_pct}%")
+            st.markdown(f'<span style="color: #94a3b8; font-weight: 500; font-size: 0.85rem;">{len(skill_gap["matched_skills"])} of {len(skill_gap["jd_skills"])} JD skills</span>', unsafe_allow_html=True)
 
         # Tabs for Skills and Model Evaluation Details
         tab_skills, tab_eval = st.tabs(["🧩 Skills Gap Analysis", "📈 Model Architecture & Test Evaluation"])
@@ -105,7 +137,7 @@ if analyze_btn:
                 st.markdown("#### ✅ Matched Skills (Present in Resume)")
                 matched = skill_gap["matched_skills"]
                 if matched:
-                    st.write(" ".join([f"`{s}`" for s in matched]))
+                    st.markdown(render_skill_badges(matched, badge_type="matched"), unsafe_allow_html=True)
                 else:
                     st.info("No direct skill keyword matches found.")
 
@@ -113,7 +145,7 @@ if analyze_btn:
                 st.markdown("#### ⚠️ Missing Skills (Skills Gap in Resume)")
                 missing = skill_gap["missing_skills"]
                 if missing:
-                    st.write(" ".join([f"`{s}`" for s in missing]))
+                    st.markdown(render_skill_badges(missing, badge_type="missing"), unsafe_allow_html=True)
                 else:
                     st.success("All JD required skills are present in the resume!")
 
