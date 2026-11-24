@@ -65,8 +65,8 @@ class HireSyncMatcher:
         - Computes baseline cosine similarity score (0 - 100%)
         - Predicts learned neural network match score (0 - 100%)
         """
-        # 1. Analyze skills gap
-        skill_analysis = analyze_skill_gap(resume_text, jd_text)
+        # 1. Analyze skills gap (with SBERT Semantic Soft-Matching)
+        skill_analysis = analyze_skill_gap(resume_text, jd_text, sbert_model=self.sbert)
         overlap_ratio = skill_analysis["overlap_ratio"]
 
         # 2. Generate SBERT embeddings

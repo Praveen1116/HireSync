@@ -1,6 +1,7 @@
 import re
 import json
 from pathlib import Path
+import numpy as np
 
 # Path to the exported skills taxonomy
 TAXONOMY_PATH = Path(__file__).resolve().parent.parent / "models" / "skills_taxonomy.json"
@@ -42,24 +43,38 @@ def extract_skills_from_text(text: str) -> set:
     return found_skills
 
 
-def analyze_skill_gap(resume_text: str, jd_text: str) -> dict:
+def analyze_skill_gap(resume_text: str, jd_text: str, sbert_model=None, semantic_threshold: float = 0.75) -> dict:
     """
     Performs skill gap analysis between resume and job description.
     
+    Features:
+    - Layer 1: Exact keyword boundary matching from curated taxonomy.
+    - Layer 2 (Method 2): Global SBERT Semantic Soft-Matching (sim >= 0.75)
+      to recognize morphological forms (e.g., 'tests' matching 'testing',
+      'managing' matching 'management') without hardcoding.
+    
     Returns:
-        dict containing:
-        - resume_skills: list of skills in resume
-        - jd_skills: list of skills in JD
-        - matched_skills: skills present in both (for green highlights)
-        - missing_skills: JD skills absent in resume (for red/gap highlights)
-        - overlap_ratio: fraction of JD skills found in resume (0.0 to 1.0)
+        dict containing matched_skills, missing_skills, and overlap_ratio.
     """
     resume_skills = extract_skills_from_text(resume_text)
     jd_skills = extract_skills_from_text(jd_text)
 
-    matched = resume_skills.intersection(jd_skills)
-    missing = jd_skills.difference(resume_skills)
+    # 1. Exact string matches
+    matched = set(resume_skills.intersection(jd_skills))
+    unmatched_jd_skills = jd_skills.difference(matched)
 
+    # 2. Global Semantic Soft-Matching using SBERT embeddings
+    if sbert_model is not None and unmatched_jd_skills:
+        resume_tokens = list(set(re.findall(r'[a-zA-Z\+\#\.\/]{3,}', resume_text.lower())))
+        if resume_tokens:
+            token_embs = sbert_model.encode(resume_tokens, convert_to_numpy=True, normalize_embeddings=True)
+            for skill in list(unmatched_jd_skills):
+                sk_emb = sbert_model.encode(skill, convert_to_numpy=True, normalize_embeddings=True)
+                sims = np.dot(token_embs, sk_emb)
+                if float(np.max(sims)) >= semantic_threshold:
+                    matched.add(skill)
+
+    missing = jd_skills.difference(matched)
     overlap_ratio = len(matched) / len(jd_skills) if len(jd_skills) > 0 else 0.0
 
     return {
