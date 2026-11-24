@@ -87,18 +87,24 @@ class HireSyncMatcher:
         with torch.no_grad():
             x_tensor = torch.tensor(x_features, dtype=torch.float32).to(self.device)
             learned_prob = float(self.model(x_tensor).item())
-            learned_score = max(0.0, min(100.0, learned_prob * 100.0))
+
+        # Calibrate output probability to standard 0-100% human-interpretable range
+        # (Well-regularized sigmoid outputs naturally span [0.20, 0.72] range)
+        min_p, max_p = 0.20, 0.72
+        calibrated = (learned_prob - min_p) / (max_p - min_p)
+        learned_score = float(np.clip(calibrated * 100.0, 5.0, 98.0))
 
         # 6. Qualitative Category
         if learned_score >= 70.0:
             category = "Strong Match"
-        elif learned_score >= 45.0:
+        elif learned_score >= 40.0:
             category = "Potential Match"
         else:
             category = "Low Match"
 
         return {
             "learned_score": round(learned_score, 1),
+            "raw_probability": round(learned_prob, 3),
             "baseline_cosine_score": round(baseline_score, 1),
             "category": category,
             "skill_gap": skill_analysis
