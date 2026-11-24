@@ -1,0 +1,14 @@
+{
+  "sbert_model_name": "all-MiniLM-L6-v2",
+  "input_dim": 1537,
+  "hidden_dim_1": 128,
+  "hidden_dim_2": 32,
+  "output_dim": 1,
+  "evaluation_metrics": {
+    "baseline_accuracy": 64.44,
+    "learned_accuracy": 80.0,
+    "baseline_ndcg5": 88.69,
+    "learned_ndcg5": 93.13,
+    "test_samples": 90
+  }
+}
