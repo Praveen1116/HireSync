@@ -101,7 +101,11 @@ The learned model was evaluated against the **Baseline Cosine Similarity** on 90
 
 ### Evaluation Visualizations
 - **Loss Curve:** Smooth, monotonically decreasing training and validation curves without overfitting.
+  <img width="798" height="424" alt="Screenshot from 2026-11-24 15-52-13" src="https://github.com/user-attachments/assets/42806b95-db40-45c9-8421-f0aa60c55d77" />
+
 - **NDCG@5 & Accuracy Chart:** Pronounced separation gap and ranking superiority over the baseline.
+  <img width="1051" height="561" alt="Screenshot from 2026-11-24 15-54-20" src="https://github.com/user-attachments/assets/0212e8d8-50b2-4cd9-870e-a3d5151bdd0a" />
+
 
 *(Artifacts saved in [`reports/loss_curve_regularized.png`](file:///home/praveen/Desktop/Sem-07/Deep-Learning/HireSync/reports/loss_curve_regularized.png) and [`reports/evaluation_comparison.png`](file:///home/praveen/Desktop/Sem-07/Deep-Learning/HireSync/reports/evaluation_comparison.png))*
 
