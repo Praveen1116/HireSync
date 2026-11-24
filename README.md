@@ -6,10 +6,6 @@
 [![Streamlit](https://img.shields.io/badge/Streamlit-UI-FF4B4B.svg)](https://streamlit.io/)
 [![Dataset](https://img.shields.io/badge/HuggingFace-resume--job--description--fit-orange.svg)](https://huggingface.co/datasets/cnamuangtoun/resume-job-description-fit)
 
-> **Course:** Deep Learning (Sem-07)  
-> **Topic:** 12 — Resume-Job Description Matching System (**SIH26044**)  
-> **Author:** Praveen Kumar Yadav (Reg: 12304556, Roll: 7)
-
 ---
 
 ## 📌 1. Project Overview & Objective
